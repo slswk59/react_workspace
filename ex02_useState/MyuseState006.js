@@ -21,13 +21,14 @@ const MyuseState006 = () => {
   });
 
   const handleChange = (e) => {
-    setCustomer({ [e.target.name]: e.target.value });
+    //setCustomer({ ...customer, [e.target.name]: e.target.value });
 
-    //setCustomer({ ...customer, name: e.target.value });
+    const { name, value } = e.target;
+    //setCustomer({ ...customer, [name]: e.target.value });
 
-    // setCustomer((prevState) => {
-    //   return { ...prevState, name: e.target.value };
-    // });
+    setCustomer((prevState) => {
+      return { ...prevState, [name]: value };
+    });
   };
 
   const handleCommit = () => {
@@ -38,7 +39,7 @@ const MyuseState006 = () => {
       phone: '',
     });
   };
-
+  //jsx문법에서는 반복문 지원x , javascript 사용할때는 {}로 묶어서 사용
   return (
     <div>
       <p>
