@@ -1,20 +1,26 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { boardActions } from '../../reduxs/actions/board_action';
 
 const BoardView = () => {
   const { num } = useParams();
   const dispatch = useDispatch();
   const navigator = useNavigate();
-
+  const config = {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      Authorization: localStorage.getItem('Authorization'),
+    },
+  };
   const boardDetail = useSelector((state) => state.board.boardDetail);
-  // const boardFile = useSelector((state) => state.board.boardFile);
+  //const boardFile = useSelector((state) => state.board.boardFile);
+
   const pv = useSelector((state) => state.board.pv);
 
   useEffect(() => {
-    dispatch(boardActions.getBoardDetail(num));
-  }, [dispatch, num]);
+    dispatch(boardActions.getBoardDetail(num, config));
+  }, []);
 
   //download
   const handleDownload = async () => {
@@ -22,7 +28,7 @@ const BoardView = () => {
       boardActions.getBoardDownload(boardDetail.upload)
     );
 
-    // await dispatch(boardActions.getBoardDownload(boardDetail.upload));
+    //dispatch(boardActions.getBoardDownload(boardDetail.upload));
 
     const fileName = boardDetail.upload.substring(
       boardDetail.upload.indexOf('_') + 1
@@ -41,21 +47,27 @@ const BoardView = () => {
     link.click();
     link.remove();
   };
-
   const handleDelete = (e) => {
     e.preventDefault();
-    dispatch(boardActions.getBoardDelete(num));
+    dispatch(
+      boardActions.getBoardDelete(num, {
+        headers: { Authorization: localStorage.getItem('Authorization') },
+      })
+    );
     navigator(`/board/list/${pv.currentPage}`);
   };
 
   return (
     <div>
-      <table className='table table-striped' style={{ marginTop: 20 }}>
+      <table className='table table-stribed' style={{ marginTop: 20 }}>
         <tbody>
           <tr>
             <th width='20%'>글쓴이</th>
-            <td>{boardDetail.reg_date}</td>
-
+            <td>
+              {boardDetail['membersDTO']
+                ? boardDetail['membersDTO']['memberName']
+                : null}
+            </td>
             <th width='20%'>조회수</th>
             <td>{boardDetail.readcount}</td>
           </tr>
@@ -66,7 +78,7 @@ const BoardView = () => {
           </tr>
 
           <tr>
-            <th>메일</th>
+            <th>이메일</th>
             <td colSpan='3'>{boardDetail.memberEmail}</td>
           </tr>
 
@@ -78,7 +90,7 @@ const BoardView = () => {
           </tr>
 
           <tr>
-            <th>파일</th>
+            <th>첨부파일</th>
             <td colSpan='3'>
               <button onClick={handleDownload}>
                 {boardDetail.upload
@@ -99,13 +111,18 @@ const BoardView = () => {
         답변
       </Link>
 
-      <Link className='btn btn-primary' to={`/board/update/${num}`}>
-        수정
-      </Link>
+      {localStorage.getItem('memberEmail') ===
+      (boardDetail['memberEmail'] ? boardDetail['memberEmail'] : null) ? (
+        <>
+          <Link className='btn btn-primary' to={`/board/update/${num}`}>
+            수정
+          </Link>
 
-      <button className='btn btn-primary' onClick={handleDelete}>
-        삭제
-      </button>
+          <button className='btn btn-primary' onClick={handleDelete}>
+            삭제
+          </button>
+        </>
+      ) : null}
     </div>
   );
 };

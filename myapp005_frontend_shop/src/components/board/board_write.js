@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { boardActions } from '../../reduxs/actions/board_action';
-import { useDispatch, useSelector } from 'react-redux';
 
 const BoardWrite = () => {
   const navigator = useNavigate();
@@ -24,12 +24,15 @@ const BoardWrite = () => {
   const boardDetail = useSelector((state) => state.board.boardDetail);
 
   const handleValueChange = (e) => {
+    //첫번째 방법
     // let nextState = {};
     // nextState[e.target.name] = e.target.value;
     // setInputs({ ...inputs, ...nextState });
 
-    // setInputs({ ...inputs, [e.target.name]: e.target.value });
+    //두번째 방법
+    //setInputs({ ...inputs, [e.target.name]: e.target.value });
 
+    //세번째 방법
     setInputs((prev) => {
       return { ...prev, [e.target.name]: e.target.value };
     });
@@ -43,14 +46,15 @@ const BoardWrite = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
+    const formData = new FormData(); //첨부파일이 있으면 formData에 담아서 넘겨주기
     formData.append('subject', subject);
     formData.append('content', content);
+    formData.append('memberEmail', localStorage.getItem('memberEmail'));
 
-    console.log('filename:', filename);
+    console.log('filename', filename);
     if (filename != null) formData.append('filename', filename);
 
-    //답변글이면...
+    //답변글이면
     if (num !== undefined) {
       formData.append('num', boardDetail.num);
       formData.append('ref', boardDetail.ref);
@@ -59,9 +63,12 @@ const BoardWrite = () => {
     }
 
     const config = {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: localStorage.getItem('Authorization'),
+      },
     };
-
+    //console.log(localStorage.getItem("Authorization"));
     await dispatch(boardActions.getBoardWrite(formData, config));
 
     setInputs({
@@ -74,11 +81,24 @@ const BoardWrite = () => {
       `/board/list/${pv.currentPage ? pv.currentPage : { currentPage: 1 }}`
     );
   };
+
   return (
     <>
       <form onSubmit={onSubmit}>
         <table>
           <tbody>
+            <tr>
+              <td>글쓴이</td>
+              <td>
+                <input
+                  type='text'
+                  readOnly
+                  value={localStorage.getItem('memberName')}
+                  name='memberName'
+                />
+              </td>
+            </tr>
+
             <tr>
               <td width='20%' align='center'>
                 제목

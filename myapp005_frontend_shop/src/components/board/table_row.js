@@ -18,9 +18,9 @@ const TableRow = (props) => {
             <img alt='re' src='/images/re.gif' />
           </>
         ) : null}
-        <Link to={`/board/view/${board.num}`}>{board.subject}</Link>
+        <Link to={`/board/view/${board.num}`}> {board.subject}</Link>
       </td>
-      <td>{board.reg_date}</td>
+      <td>{board['membersDTO'] ? board['membersDTO']['memberName'] : null}</td>
       <td>{board.readcount}</td>
     </tr>
   );

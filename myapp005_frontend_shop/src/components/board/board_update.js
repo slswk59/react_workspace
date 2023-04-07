@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { boardActions } from '../../reduxs/actions/board_action';
@@ -17,11 +18,9 @@ const BoardUpdate = () => {
   const { subject, content, filename } = inputs;
 
   const board = useSelector((state) => state.board.boardDetail);
-
   const pv = useSelector((state) => state.board.pv);
 
   useEffect(() => {
-    dispatch(boardActions.getBoardDetail(num));
     setInputs(board);
   }, []);
 
@@ -48,11 +47,14 @@ const BoardUpdate = () => {
     formData.append('content', content);
     formData.append('currentPage', pv.currentPage);
 
-    console.log('filename:', filename);
+    console.log('filename', filename);
     if (filename != null) formData.append('filename', filename);
 
     const config = {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: localStorage.getItem('Authorization'),
+      },
     };
 
     await dispatch(boardActions.getBoardUpdate(formData, config));
@@ -69,8 +71,6 @@ const BoardUpdate = () => {
   const handleReset = (e) => {
     e.preventDefault();
     setInputs(board);
-    //취소버튼을 클릭했을때 원래 값을 가져오기 위해서
-    //value와 defaultValue로값을 넣은것임.
   };
 
   const handleBack = (e) => {
@@ -80,12 +80,15 @@ const BoardUpdate = () => {
 
   return (
     <div>
-      <form name='frm'>
+      <form name='frm' encType='multipart/form-data'>
         <table className='table table-striped' style={{ marginTop: 20 }}>
           <tbody>
             <tr>
               <th width='20%'>글쓴이</th>
-              <td>{board.writer}</td>
+              {/* <td>{board.writer}</td> */}
+              <td>
+                {board['membersDTO'] ? board['membersDTO']['memberName'] : null}
+              </td>
               <th width='20%'>등록일</th>
               <td>{board.reg_date}</td>
             </tr>
@@ -97,7 +100,7 @@ const BoardUpdate = () => {
                   type='text'
                   name='subject'
                   id='subject'
-                  defaultValue={board.subject}
+                  //  defaultValue={board.subject}
                   value={subject}
                   onChange={handleValueChange}
                 />
@@ -112,7 +115,7 @@ const BoardUpdate = () => {
                   id='content'
                   rows='13'
                   cols='40'
-                  defaultValue={board.content}
+                  //   defaultValue={board.content} //왜..???
                   value={content}
                   onChange={handleValueChange}
                 ></textarea>
